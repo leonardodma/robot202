@@ -37,22 +37,7 @@ upper = 1
 
 print("Press q to QUIT")
 
-# Returns an image containing the borders of the image
-# sigma is how far from the median we are setting the thresholds
-def auto_canny(image, sigma=0.33):
-    # compute the median of the single channel pixel intensities
-    v = np.median(image)
-
-    # apply automatic Canny edge detection using the computed median
-    lower = int(max(0, (1.0 - sigma) * v))
-    upper = int(min(255, (1.0 + sigma) * v))
-    edged = cv2.Canny(image, lower, upper)
-
-    # return the edged image
-    return edged
-
-
-mascara = input("Qual cor identificar? (MAGENTA OU CIANO): ")
+mascara = input("Qual a cor do circulo que você quer identificar? (MAGENTA OU CIANO): ")
 
 while(True):
     hsv1 = None
@@ -76,17 +61,18 @@ while(True):
     #Craindo e aplicando as máscaras
     mask = cv2.inRange(blur, hsv1, hsv2)
     
-    selecao = cv2.bitwise_and(rgb, rgb, mask=mask)
-    
-    segmentado = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((10, 10)))
+    segmentado = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((4, 4)))
+
+    selecao = cv2.bitwise_and(rgb, rgb, mask=segmentado)
     
     # Detect the edges present in the image
-    bordas = auto_canny(segmentado)
-
-    circulos = cv2.bitwise_and(rgb, rgb, mask=bordas)
+    contornos, arvore = cv2.findContours(segmentado.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
+    contornos_img = rgb.copy()
+    cv2.drawContours(contornos_img, contornos, -1, [0, 0, 255], 3);
 
     # Display the resulting frame
-    cv2.imshow('Detector de circulos',circulos)
+    cv2.imshow('Detector de circulos', contornos_img)
     if cv2.waitKey(1) &  0xFF == ord('q'):
         break
 
