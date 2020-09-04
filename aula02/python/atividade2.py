@@ -63,7 +63,7 @@ while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
 
-    # Convert the frame to grayscale
+
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -103,7 +103,7 @@ while(True):
     cv2.putText(bordas_color,'Press q to quit',(0,50), font, 1,(255,255,255),2,cv2.LINE_AA)
 
     # Display th e resulting frame
-    cv2.imshow('Detector de circulos', segmentado)
+    cv2.imshow('Detector de circulos', bordas_color)
     
     # cv2.imshow('Detector de circulos', rgb)
     if cv2.waitKey(1) &  0xFF == ord('q'):
