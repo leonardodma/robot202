@@ -35,9 +35,21 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 lower = 0
 upper = 1
 
-print("Press q to QUIT")
-
 mascara = input("Qual a cor do circulo que você quer identificar? (MAGENTA OU CIANO): ")
+
+
+def auto_canny(image, sigma=0.33):
+    # compute the median of the single channel pixel intensities
+    v = np.median(image)
+
+    # apply automatic Canny edge detection using the computed median
+    lower = int(max(0, (1.0 - sigma) * v))
+    upper = int(min(255, (1.0 + sigma) * v))
+    edged = cv2.Canny(image, lower, upper)
+
+    # return the edged image
+    return edged
+
 
 while(True):
     hsv1 = None
@@ -54,24 +66,44 @@ while(True):
     # Convert the frame to grayscale
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    # A gaussian blur to get rid of the noise in the image
-    blur = cv2.GaussianBlur(hsv,(5,5),0) 
     
     #Craindo e aplicando as máscaras
-    mask = cv2.inRange(blur, hsv1, hsv2)
+    mask = cv2.inRange(hsv, hsv1, hsv2)
+    segmentado = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((10, 10)))
     
-    segmentado = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((4, 4)))
 
-    selecao = cv2.bitwise_and(rgb, rgb, mask=segmentado)
-    
-    contornos, arvore = cv2.findContours(segmentado.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    
-    contornos_img = rgb.copy()
-    cv2.drawContours(contornos_img, contornos, -1, [0, 0, 255], 3);
+    bordas = auto_canny(segmentado)
+
+
+    circles = []
+
+    # Obtains a version of the edges image where we can draw in color
+    bordas_color = cv2.cvtColor(bordas, cv2.COLOR_GRAY2BGR)
+
+    # HoughCircles - detects circles using the Hough Method. For an explanation of
+    # param1 and param2 please see an explanation here http://www.pyimagesearch.com/2014/07/21/detecting-circles-images-using-opencv-hough-circles/
+    circles = None
+    circles=cv2.HoughCircles(bordas,cv2.HOUGH_GRADIENT,2,40,param1=50,param2=100,minRadius=5,maxRadius=100)
+
+    if circles is not None:        
+        circles = np.uint16(np.around(circles))
+        for i in circles[0,:]:
+            print(i)
+            # draw the outer circle
+            # cv2.circle(img, center, radius, color[, thickness[, lineType[, shift]]])
+            cv2.circle(bordas_color,(i[0],i[1]),i[2],(0,255,0),2)
+            # draw the center of the circle
+            cv2.circle(bordas_color,(i[0],i[1]),2,(0,0,255),3)
+
+
+    # cv2.putText(img, text, org, fontFace, fontScale, color[, thickness[, lineType[, bottomLeftOrigin]]])
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    cv2.putText(bordas_color,'Press q to quit',(0,50), font, 1,(255,255,255),2,cv2.LINE_AA)
 
     # Display th e resulting frame
-    cv2.imshow('Detector de circulos', contornos_img)
+    cv2.imshow('Detector de circulos', segmentado)
     
     # cv2.imshow('Detector de circulos', rgb)
     if cv2.waitKey(1) &  0xFF == ord('q'):
