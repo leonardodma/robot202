@@ -65,14 +65,15 @@ while(True):
 
     selecao = cv2.bitwise_and(rgb, rgb, mask=segmentado)
     
-    # Detect the edges present in the image
     contornos, arvore = cv2.findContours(segmentado.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
     contornos_img = rgb.copy()
     cv2.drawContours(contornos_img, contornos, -1, [0, 0, 255], 3);
 
-    # Display the resulting frame
+    # Display th e resulting frame
     cv2.imshow('Detector de circulos', contornos_img)
+    
+    # cv2.imshow('Detector de circulos', rgb)
     if cv2.waitKey(1) &  0xFF == ord('q'):
         break
 
