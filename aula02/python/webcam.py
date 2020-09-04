@@ -3,6 +3,7 @@
 
 import cv2
 import sys
+import numpy as np
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
@@ -26,11 +27,14 @@ if __name__ == "__main__":
         # Our operations on the frame come here
         bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR) 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         # Display the resulting frame
-        # cv2.imshow('frame',frame)
-        cv2.imshow('frame', frame)
+        # cv2.imshow('frame', frame)
+        cv2.imshow('gray', gray)
 
+
+        # Interrompe o canal 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
