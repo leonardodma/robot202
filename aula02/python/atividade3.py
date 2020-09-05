@@ -14,9 +14,18 @@ from imutils import paths
 
 def encontra_marcador(img):
         # convert the image to grayscale, blur it, and detect edges
+        hsv = cv2.cvtColor(img , cv2.COLOR_BGR2HSV)
+        rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (5, 5), 0)
-        edged = cv2.Canny(gray, 35, 125)
+
+        # Cria máscara para a cor magenta
+        hsv1, hsv2 = aux.ranges('#FF00FF')
+        mask = cv2.inRange(hsv, hsv1, hsv2)
+
+
+        blur = cv2.GaussianBlur(mask, (5, 5), 0)
+        edged = cv2.Canny(blur, 35, 125)
+        
         # find the contours in the edged image and keep the largest one;
 
         cnts = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -58,7 +67,7 @@ upper = 1
 
 KD = 30 # Know distance (cm)
 H = 7.6 # Real distance between the two circle centers (cm)
-h = 60.5 # Distânce beyween the two circle centers in the screen  (pixel) 
+h = 60.5 # Distânce between the two circle centers in the screen  (pixel) 
 f = (h*KD)/H #Pixel
 
 
@@ -66,22 +75,19 @@ while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
 
+    marker = encontra_marcador(frame)
 
-    # loop over the images
-    for imagePath in sorted(paths.list_images(frame)):
-        # load the image, find the marker in the image, then compute the
-        # distance to the marker from the camera
-        image = cv2.imread(imagePath)
-        marker = encontra_marcador(image)
-        inches = encontra_distancia(H, h, marker[1][0])
-        # draw a bounding box around the image and display it
-        box = cv2.cv.BoxPoints(marker) if imutils.is_cv2() else cv2.boxPoints(marker)
-        box = np.int0(box)
-        cv2.drawContours(image, [box], -1, (0, 255, 0), 2)
-        cv2.putText(image, "%.2fft" % (inches / 12),
-            (image.shape[1] - 200, image.shape[0] - 20), cv2.FONT_HERSHEY_SIMPLEX,
-            2.0, (0, 255, 0), 3)
-        cv2.imshow(frame)
+    centimetros = encontra_distancia(H, marker[1][0], f)
+    
+    # draw a bounding box around the image and display it
+    box = cv2.cv.BoxPoints(marker) if imutils.is_cv2() else cv2.boxPoints(marker)
+    box = np.int0(box)
+    cv2.drawContours(frame, [box], -1, (0, 255, 0), 2)
+    cv2.putText(frame, "%.2fcm" % (centimetros),
+        (frame.shape[1] - 300, frame.shape[0] - 20), cv2.FONT_HERSHEY_SIMPLEX,
+        2.0, (0, 255, 0), 3)
+    
+    cv2.imshow('Medidor de Distância', frame)
     
 
     if cv2.waitKey(1) &  0xFF == ord('q'):

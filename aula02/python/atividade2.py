@@ -104,7 +104,7 @@ while(True):
 
     # Display th e resulting frame
     cv2.imshow('Detector de circulos', bordas_color)
-    
+    cv2.imshow('Câmera', frame)
     # cv2.imshow('Detector de circulos', rgb)
     if cv2.waitKey(1) &  0xFF == ord('q'):
         break
