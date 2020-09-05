@@ -35,7 +35,7 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 lower = 0
 upper = 1
 
-mascara = input("Qual a cor do circulo que você quer identificar? (MAGENTA OU CIANO): ")
+# mascara = input("Qual a cor do circulo que você quer identificar? (MAGENTA OU CIANO): ")
 
 
 def auto_canny(image, sigma=0.33):
@@ -52,13 +52,11 @@ def auto_canny(image, sigma=0.33):
 
 
 while(True):
-    hsv1 = None
-    hsv2 = None
+    # MAGENTA
+    hsv_m1, hsv_m2 = aux.ranges('#FF00FF')
 
-    if mascara == 'MAGENTA':
-        hsv1, hsv2 = aux.ranges('#FF00FF')
-    elif mascara == 'CIANO':
-        hsv1, hsv2 = aux.ranges('#00FFFF')
+    # CIANO
+    hsv_c1, hsv_c2 = aux.ranges('#00FFFF')
 
     # Capture frame-by-frame
     ret, frame = cap.read()
@@ -70,7 +68,10 @@ while(True):
 
     
     #Craindo e aplicando as máscaras
-    mask = cv2.inRange(hsv, hsv1, hsv2)
+    mask_m = cv2.inRange(hsv, hsv_m1, hsv_m2)
+    mask_c = cv2.inRange(hsv, hsv_c1, hsv_c2)
+    mask = mask_c + mask_m
+
     segmentado = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((10, 10)))
     
 
@@ -103,9 +104,8 @@ while(True):
     cv2.putText(bordas_color,'Press q to quit',(0,50), font, 1,(255,255,255),2,cv2.LINE_AA)
 
     # Display th e resulting frame
-    cv2.imshow('Detector de circulos', bordas_color)
-    cv2.imshow('Câmera', frame)
-    # cv2.imshow('Detector de circulos', rgb)
+    cv2.imshow('Detector de circulos', mask)
+
     if cv2.waitKey(1) &  0xFF == ord('q'):
         break
 
