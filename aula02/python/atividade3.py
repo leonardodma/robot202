@@ -30,6 +30,7 @@ def encontra_marcador(img):
 
         cnts = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         cnts = imutils.grab_contours(cnts)
+        
         c = max(cnts, key = cv2.contourArea)
         # compute the bounding box of the of the paper region and return it
         return cv2.minAreaRect(c)

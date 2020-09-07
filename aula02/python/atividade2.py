@@ -1,9 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
-__author__      = "Matheus Dib, Fabio de Miranda"
-
-
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
