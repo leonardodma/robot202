@@ -1,8 +1,9 @@
 # Referências:
 # https://www.geeksforgeeks.org/circle-detection-using-opencv-python/   
-# https://stackoverflow.com/questions/47349833/draw-line-between-two-given-points-opencv-python
+# https://www.geeksforgeeks.org/python-opencv-cv2-line-method/
 
 
+import math
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
@@ -63,9 +64,8 @@ while(True):
     circles_magenta = encontra_circulo(frame, '#FF00FF')
     circles_ciano = encontra_circulo(frame, '#5dbcce')
 
-
-    a_m, b_m, r_m = None, None, None
-    a_c, b_c, r_c = None, None, None
+    x_m, y_m, r_m = None, None, None
+    x_c, y_c, r_c = None, None, None
 
 
     if circles_magenta is not None:
@@ -73,28 +73,43 @@ while(True):
     
         # Desenha círculos da cor Magenta 
         for pt in circles_magenta[0, :]: 
-            a_m, b_m, r_m = pt[0], pt[1], pt[2] 
+            x_m, y_m, r_m = pt[0], pt[1], pt[2] 
     
             # Draw the circunference of the circle. 
-            cv2.circle(frame, (a_m, b_m), r_m, (0, 255, 255), 2) 
+            cv2.circle(frame, (x_m, y_m), r_m, (0, 255, 255), 2) 
     
             # Draw a small circle (of radius 1) to show the center. 
-            cv2.circle(frame, (a_m, b_m), 1, (0, 255, 255), 3)
+            cv2.circle(frame, (x_m, y_m), 1, (0, 255, 255), 3)
 
 
     if circles_ciano is not None: 
         circles_ciano= np.uint16(np.around(circles_ciano)) 
         # Desenha círculos da cor ciano 
         for pt in circles_ciano[0, :]: 
-            a_c, b_c, r_c = pt[0], pt[1], pt[2] 
+            x_c, y_c, r_c = pt[0], pt[1], pt[2] 
     
             # Draw the circunference of the circle. 
-            cv2.circle(frame, (a_c, b_c), r_c, (0, 255, 255), 2) 
+            cv2.circle(frame, (x_c, y_c), r_c, (0, 255, 255), 2) 
     
             # Draw a small circle (of radius 1) to show the center. 
-            cv2.circle(frame, (a_c, b_c), 1, (0, 255, 255), 3)
+            cv2.circle(frame, (x_c, y_c), 1, (0, 255, 255), 3)
 
 
+    centro_ciano = tuple([x_c, y_c])
+    centro_magenta = tuple([x_m, y_m])
+
+    angle = None
+    
+    if centro_ciano[0] != None or centro_magenta[0] != None:
+        try:
+            line = cv2.line(frame, centro_ciano, centro_magenta, (255, 0, 0), 6)
+            angle = math.atan((y_m - y_c)/ (x_m - x_c))
+        except:
+            pass
+
+    if angle != None:
+        cv2.putText(frame, "Angulo: %.2f graus" % (math.degrees(angle)),(frame.shape[1] - 600, frame.shape[0] - 10), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0), 2)
 
     cv2.imshow("Detected Circle", frame)
 
