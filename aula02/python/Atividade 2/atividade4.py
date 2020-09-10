@@ -98,12 +98,14 @@ while(True):
     centro_ciano = tuple([x_c, y_c])
     centro_magenta = tuple([x_m, y_m])
 
+    print(centro_ciano)
+
     angle = None
     
     if centro_ciano[0] != None or centro_magenta[0] != None:
         try:
             line = cv2.line(frame, centro_ciano, centro_magenta, (255, 0, 0), 6)
-            angle = math.atan((y_m - y_c)/ (x_m - x_c))
+            angle = math.atan(abs((y_m - y_c))/ abs((x_m - x_c)))
         except:
             pass
 
