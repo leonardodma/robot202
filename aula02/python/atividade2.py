@@ -1,5 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
@@ -52,15 +50,13 @@ while(True):
     hsv_m1, hsv_m2 = aux.ranges('#FF00FF')
 
     # CIANO
-    hsv_c1, hsv_c2 = aux.ranges('#00FFFF')
+    hsv_c1, hsv_c2 = aux.ranges('#5dbcce')
 
     # Capture frame-by-frame
     ret, frame = cap.read()
 
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     
     #Craindo e aplicando as máscaras
@@ -70,19 +66,22 @@ while(True):
 
     segmentado = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((10, 10)))
     
+    segmentado = cv2.adaptiveThreshold(segmentado,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
+                 cv2.THRESH_BINARY,11,3.5)
 
-    bordas = auto_canny(segmentado)
-
+    kernel = np.ones((3, 3),np.uint8)
+	
+    segmentado = cv2.erode(segmentado,kernel,iterations = 1)
 
     circles = []
 
     # Obtains a version of the edges image where we can draw in color
-    bordas_color = cv2.cvtColor(bordas, cv2.COLOR_GRAY2BGR)
+    bordas_color = cv2.cvtColor(segmentado, cv2.COLOR_GRAY2BGR)
 
     # HoughCircles - detects circles using the Hough Method. For an explanation of
     # param1 and param2 please see an explanation here http://www.pyimagesearch.com/2014/07/21/detecting-circles-images-using-opencv-hough-circles/
     circles = None
-    circles=cv2.HoughCircles(bordas,cv2.HOUGH_GRADIENT,2,40,param1=50,param2=100,minRadius=5,maxRadius=100)
+    circles=cv2.HoughCircles(segmentado,cv2.HOUGH_GRADIENT,2,40,param1=50,param2=100,minRadius=5,maxRadius=100)
 
     if circles is not None:        
         circles = np.uint16(np.around(circles))
@@ -100,7 +99,7 @@ while(True):
     cv2.putText(bordas_color,'Press q to quit',(0,50), font, 1,(255,255,255),2,cv2.LINE_AA)
 
     # Display th e resulting frame
-    cv2.imshow('Detector de circulos', mask)
+    cv2.imshow('Detector de circulos', bordas_color)
 
     if cv2.waitKey(1) &  0xFF == ord('q'):
         break

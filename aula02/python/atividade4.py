@@ -19,18 +19,20 @@ def encontra_circulo(img, codigo_cor):
 
     # convert the image to grayscale, blur it, and detect edges
     hsv = cv2.cvtColor(img , cv2.COLOR_BGR2HSV)
+    gray = cv2.cvtColor(img , cv2.COLOR_BGR2GRAY)
+    
+    color_mask = cv2.inRange(hsv, hsv_1, hsv_2)
+   
+    segmentado = cv2.morphologyEx(color_mask, cv2.MORPH_CLOSE, np.ones((10, 10)))
+    
+    segmentado = cv2.adaptiveThreshold(segmentado,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
+                 cv2.THRESH_BINARY,11,3.5)
 
-    #blur = cv2.GaussianBlur(hsv, (5, 5), 0)
-
-    mask = cv2.inRange(hsv, hsv_1, hsv_2)
-
-    #res = cv2.bitwise_and(hsv, hsv, mask=mask_m)
-    #res_gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
-
-    blur = cv2.GaussianBlur(mask, (5, 5), 0)
-    edged = cv2.Canny(blur, 35, 125)
-
-    circles=cv2.HoughCircles(edged, cv2.HOUGH_GRADIENT,2,40,param1=50,param2=100,minRadius=5,maxRadius=100)
+    kernel = np.ones((3, 3),np.uint8)
+	
+    segmentado = cv2.erode(segmentado,kernel,iterations = 1)
+    
+    circles=cv2.HoughCircles(segmentado, cv2.HOUGH_GRADIENT,2,40,param1=50,param2=100,minRadius=5,maxRadius=100)
     
     return circles
 
@@ -59,7 +61,7 @@ while(True):
     ret, frame = cap.read()
 
     circles_magenta = encontra_circulo(frame, '#FF00FF')
-    circles_ciano = encontra_circulo(frame, '#7efcfc')
+    circles_ciano = encontra_circulo(frame, '#5dbcce')
 
 
     a_m, b_m, r_m = None, None, None
@@ -93,7 +95,6 @@ while(True):
             cv2.circle(frame, (a_c, b_c), 1, (0, 255, 255), 3)
 
 
-    #cv2.line(frame, tuple[a_m, b_m], tuple(a_c, b_c), (0, 255, 0), thickness=3, lineType=8)
 
     cv2.imshow("Detected Circle", frame)
 
