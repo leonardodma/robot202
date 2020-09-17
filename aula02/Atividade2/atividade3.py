@@ -79,17 +79,20 @@ while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
 
-    marker = encontra_marcador(frame)
+    try:
+        marker = encontra_marcador(frame)
 
-    centimetros = encontra_distancia(H, marker[1][0], f)
-    
-    # draw a bounding box around the image and display it
-    box = cv2.cv.BoxPoints(marker) if imutils.is_cv2() else cv2.boxPoints(marker)
-    box = np.int0(box)
-    cv2.drawContours(frame, [box], -1, (0, 255, 0), 2)
-    cv2.putText(frame, "%.2fcm" % (centimetros),
-        (frame.shape[1] - 300, frame.shape[0] - 20), cv2.FONT_HERSHEY_SIMPLEX,
-        2.0, (0, 255, 0), 3)
+        centimetros = encontra_distancia(H, marker[1][0], f)
+        
+        # draw a bounding box around the image and display it
+        box = cv2.cv.BoxPoints(marker) if imutils.is_cv2() else cv2.boxPoints(marker)
+        box = np.int0(box)
+        cv2.drawContours(frame, [box], -1, (0, 255, 0), 2)
+        cv2.putText(frame, "%.2fcm" % (centimetros),
+            (frame.shape[1] - 300, frame.shape[0] - 20), cv2.FONT_HERSHEY_SIMPLEX,
+            2.0, (0, 255, 0), 3)
+    except:
+        pass
     
     cv2.imshow('Medidor de Distância', frame)
     
